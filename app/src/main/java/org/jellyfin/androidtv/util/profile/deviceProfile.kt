@@ -57,6 +57,15 @@ internal val hlsMpegTsAudioCodecs = arrayOf(
 	Codec.Audio.MP3
 )
 
+// TRUEHD deliberately excluded: ExoPlayer/Media3's FragmentedMp4Extractor does not use the
+// TrueHdSampleRechunker that the non-fragmented Mp4Extractor uses, so a TrueHD track delivered
+// as fMP4 (which HLS requires) throws AudioSink$UnexpectedDiscontinuityException at runtime -
+// confirmed live (byte-correct via ffprobe, but no audible output on a real Chromecast with
+// Google TV + AVR) and matches a currently open, "unlikely to be addressed soon" upstream
+// report: https://github.com/androidx/media/issues/1519. Declaring it here would make this app
+// request a combination that silently produces worse output (no audio) than the AAC fallback it
+// replaces. DTS has no equivalent report and is kept, but its fMP4 behavior on this platform is
+// likewise unverified either way - noted for whoever tests that path for real.
 internal val hlsFmp4AudioCodecs = arrayOf(
 	Codec.Audio.AAC,
 	Codec.Audio.AC3,
@@ -65,8 +74,7 @@ internal val hlsFmp4AudioCodecs = arrayOf(
 	Codec.Audio.ALAC,
 	Codec.Audio.FLAC,
 	Codec.Audio.OPUS,
-	Codec.Audio.DTS,
-	Codec.Audio.TRUEHD
+	Codec.Audio.DTS
 )
 
 private fun UserPreferences.getMaxBitrate(): Int {

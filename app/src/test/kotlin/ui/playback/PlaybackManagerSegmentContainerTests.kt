@@ -45,12 +45,16 @@ class PlaybackManagerSegmentContainerTests : FunSpec({
 	// For fMP4 only the ts-incompatible subset of hlsFmp4AudioCodecs is sent (also verified live:
 	// the full list trips the server's own 40-char limit on this parameter and gets rejected with
 	// a 400) - that subset is also the precise reason fMP4 was negotiated in the first place.
-	test("HLS source with fMP4 transcoding container requests that container and the codecs ts cannot carry") {
+	// TRUEHD is deliberately absent from hlsFmp4AudioCodecs (see deviceProfile.kt) - ExoPlayer's
+	// FragmentedMp4Extractor cannot play it (androidx/media#1519), confirmed live: byte-correct
+	// via ffprobe but silent on real hardware. This pins that exclusion down as a spec, not an
+	// oversight the next drive-by edit could "restore".
+	test("HLS source with fMP4 transcoding container requests that container and the codecs ts cannot carry, excluding TrueHD") {
 		val source = hlsMediaSource(transcodingContainer = "mp4")
 
 		source.segmentContainerQueryParameters() shouldBe mapOf(
 			"segmentContainer" to "mp4",
-			"audioCodec" to "alac,flac,opus,dts,truehd",
+			"audioCodec" to "alac,flac,opus,dts",
 		)
 	}
 
